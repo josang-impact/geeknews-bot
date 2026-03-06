@@ -2,12 +2,15 @@ import feedparser
 import requests
 import os
 
-RSS_URL = "https://news.hada.io/rss"
+RSS_URL = "https://news.hada.io/rss/news"
 WEBHOOK = os.environ["KAKAOWORK_WEBHOOK"]
 
 feed = feedparser.parse(RSS_URL)
 
-# 마지막 뉴스 저장
+if len(feed.entries) == 0:
+    print("RSS empty")
+    exit()
+
 try:
     with open("last_id.txt") as f:
         last_id = f.read().strip()
@@ -35,14 +38,13 @@ for entry in feed.entries:
 
 {link}
 """
+
     messages.append(text)
 
 for msg in reversed(messages):
     requests.post(
         WEBHOOK,
-        json={
-            "text": msg
-        }
+        json={"text": msg}
     )
 
 with open("last_id.txt", "w") as f:
