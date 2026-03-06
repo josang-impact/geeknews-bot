@@ -1,0 +1,30 @@
+name: Send GeekNews
+
+on:
+  schedule:
+    - cron: '0 1 * * 1-5'
+    - cron: '0 6 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install
+        run: pip install feedparser requests
+
+      - name: run script
+        env:
+          KAKAOWORK_WEBHOOK: ${{ secrets.KAKAOWORK_WEBHOOK }}
+        run: python send_news.py
+
+      - name: commit state
+        run: |
+          git config --global user.name bot
+          git config --global user.email bot@bot.com
+          git add last_id.txt
+          git commit -m "update last id" || exit 0
+          git push
