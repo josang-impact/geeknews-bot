@@ -6,25 +6,25 @@ on:
     - cron: '0 6 * * 1-5'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   run:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: install
-        run: pip install feedparser requests
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: install packages
+        run: pip install -r requirements.txt
 
       - name: run script
         env:
           KAKAOWORK_WEBHOOK: ${{ secrets.KAKAOWORK_WEBHOOK }}
         run: python send_news.py
-
-      - name: commit state
-        run: |
-          git config --global user.name bot
-          git config --global user.email bot@bot.com
-          git add last_id.txt
-          git commit -m "update last id" || exit 0
-          git push
